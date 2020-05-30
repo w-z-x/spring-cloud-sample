@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: eureka-server
+  security:
+    user:
+      name: user
+      password: pwd
+
+
+server.port: 9001
+
+eureka:
+  instance:
+    hostname: peer1
+    instance-id: eureka-9001
+  client:
+    service-url:
+      defaultZone: http://user:pwd@peer2:9002/eureka,http://user:pwd@peer3:9003/eureka
+
+logging.level.root: info
