@@ -52,9 +52,9 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
         //开启支持refresh_token
         tokenServices.setSupportRefreshToken(true);
         //token有效期
-        tokenServices.setAccessTokenValiditySeconds(1 * 1 * 60);
+        tokenServices.setAccessTokenValiditySeconds(1 * 60 * 60);
         //refresh_token有效期
-        tokenServices.setRefreshTokenValiditySeconds(1 * 1 * 1 * 60);
+        tokenServices.setRefreshTokenValiditySeconds(1 * 1 * 60 * 60);
         return tokenServices;
     }
 
@@ -87,8 +87,8 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
         //@formatter:off
         clients.inMemory()
-                .withClient("user")
-                .secret(passwordEncoder().encode("12345"))
+                .withClient("client_id_sample")
+                .secret(passwordEncoder().encode("client_secret_sample"))
                 .authorizedGrantTypes("refresh_token", "client_credentials") //主要配置这里为client_credentials
                 .scopes("all");
         //@formatter:on

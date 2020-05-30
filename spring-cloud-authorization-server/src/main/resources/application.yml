@@ -1,7 +1,13 @@
-server:
-  port: 8081
-
 spring:
+  application:
+    name: auth-service
   redis:
     host: 192.168.133.130
     port: 6379
+
+server.port: 8081
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://user:pwd@peer1:9001/eureka,http://user:pwd@peer2:9002/eureka,http://user:pwd@peer3:9003/eureka
