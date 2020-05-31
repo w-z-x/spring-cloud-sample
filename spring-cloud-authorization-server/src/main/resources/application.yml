@@ -4,10 +4,17 @@ spring:
   redis:
     host: 192.168.133.130
     port: 6379
+  data.mongodb.uri: mongodb://192.168.133.130:38017/oauth
+  cache:
+    cache-names: mongo
+    caffeine:
+      spec: initialCapacity=10,maximumSize=500,expireAfterWrite=5s
+    type: caffeine
 
 server.port: 8081
 
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://user:pwd@peer1:9001/eureka,http://user:pwd@peer2:9002/eureka,http://user:pwd@peer3:9003/eureka
+      defaultZone: http://localhost:8761/eureka
+#      defaultZone: http://user:pwd@peer1:9001/eureka,http://user:pwd@peer2:9002/eureka,http://user:pwd@peer3:9003/eureka

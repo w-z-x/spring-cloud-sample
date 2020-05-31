@@ -1,9 +1,11 @@
 package com.azurer.spring.oauth.config;
 
+import com.azurer.spring.oauth.mongo.MongoClientDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
@@ -16,7 +18,6 @@ import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenGranter;
 import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
-import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
@@ -33,7 +34,7 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
     public RedisConnectionFactory redisConnectionFactory;
 
     @Resource
-    public ClientDetailsService clientDetailsService;
+    public MongoClientDetailsService mongoClientDetailsService;
 
     @Bean
     public TokenStore tokenStore() {
@@ -47,29 +48,32 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
     @Bean
     public DefaultTokenServices tokenServices() {
         DefaultTokenServices tokenServices = new DefaultTokenServices();
+        tokenServices.setClientDetailsService(mongoClientDetailsService);
         //配置token存储
         tokenServices.setTokenStore(tokenStore());
         //开启支持refresh_token
         tokenServices.setSupportRefreshToken(true);
-        //token有效期
-        tokenServices.setAccessTokenValiditySeconds(1 * 60 * 60);
-        //refresh_token有效期
-        tokenServices.setRefreshTokenValiditySeconds(1 * 1 * 60 * 60);
         return tokenServices;
     }
 
+//    @Bean
+//    public PasswordEncoder passwordEncoder() {
+//        return new BCryptPasswordEncoder();
+//    }
+
+    @SuppressWarnings("deprecation")
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    public static NoOpPasswordEncoder passwordEncoder() {
+        return (NoOpPasswordEncoder) NoOpPasswordEncoder.getInstance();
     }
 
     @Bean
     public TokenGranter tokenGranter() {
-        ClientDetailsService clientDetails = clientDetailsService;
+        ClientDetailsService clientDetails = mongoClientDetailsService;
         AuthorizationServerTokenServices tokenServices = tokenServices();
-        OAuth2RequestFactory requestFactory = new DefaultOAuth2RequestFactory(clientDetails);
+        OAuth2RequestFactory requestFactory = new CustomOAuth2RequestFactory(clientDetails);
 
-        List<TokenGranter> tokenGranters = new ArrayList<TokenGranter>();
+        List<TokenGranter> tokenGranters = new ArrayList<>();
         tokenGranters.add(new RefreshTokenGranter(tokenServices, clientDetails, requestFactory));
         ClientCredentialsTokenGranter clientCredentialsTokenGranter =
                 new ClientCredentialsTokenGranter(tokenServices, clientDetails, requestFactory);
@@ -85,17 +89,12 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
 
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-        //@formatter:off
-        clients.inMemory()
-                .withClient("client_id_sample")
-                .secret(passwordEncoder().encode("client_secret_sample"))
-                .authorizedGrantTypes("refresh_token", "client_credentials") //主要配置这里为client_credentials
-                .scopes("all");
-        //@formatter:on
+        clients.withClientDetails(mongoClientDetailsService);
     }
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+        endpoints.setClientDetailsService(mongoClientDetailsService);
         endpoints.tokenServices(tokenServices())
                 .tokenGranter(tokenGranter());
     }
