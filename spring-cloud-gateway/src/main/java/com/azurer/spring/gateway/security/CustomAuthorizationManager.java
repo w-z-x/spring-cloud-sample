@@ -8,20 +8,21 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.web.server.authorization.AuthorizationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
-import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 自定义授权管理器
+ */
 @Slf4j
 @Component
-public class AccessManager implements ReactiveAuthorizationManager<AuthorizationContext> {
+public class CustomAuthorizationManager implements ReactiveAuthorizationManager<AuthorizationContext> {
     private final Set<String> permitAll = ConcurrentHashMap.newKeySet();
     private static final AntPathMatcher antPathMatcher = new AntPathMatcher();
 
-
-    public AccessManager() {
+    public CustomAuthorizationManager() {
         permitAll.add("/");
         permitAll.add("/error");
         permitAll.add("/favicon.ico");
@@ -36,42 +37,39 @@ public class AccessManager implements ReactiveAuthorizationManager<Authorization
 
     @Override
     public Mono<AuthorizationDecision> check(Mono<Authentication> mono, AuthorizationContext authorizationContext) {
-        ServerWebExchange exchange = authorizationContext.getExchange();
-        //请求资源
-        String requestPath = exchange.getRequest().getURI().getPath();
-        // 是否直接放行
-        if (permitAll(requestPath)) {
+        String requestPath = authorizationContext.getExchange().getRequest().getURI().getPath();
+
+        if (permitAll.stream().anyMatch(r -> antPathMatcher.match(r, requestPath))) {
             return Mono.just(new AuthorizationDecision(true));
         }
 
-        return mono.map(auth -> new AuthorizationDecision(checkAuthorities(auth)))
+        return mono.map(auth -> new AuthorizationDecision(checkAuthorities(auth, requestPath)))
                 .defaultIfEmpty(new AuthorizationDecision(false));
     }
 
-    @Override
-    public Mono<Void> verify(Mono<Authentication> authentication, AuthorizationContext object) {
-        return null;
-    }
-
-    /**
-     * 校验是否属于静态资源
-     *
-     * @param requestPath 请求路径
-     * @return 属于静态资源为true
-     */
-    private boolean permitAll(String requestPath) {
-        return permitAll.stream()
-                .anyMatch(r -> antPathMatcher.match(r, requestPath));
-    }
-
-    //权限校验
-    private boolean checkAuthorities(Authentication auth) {
+    private boolean checkAuthorities(Authentication auth, String requestPath) {
         if (auth instanceof OAuth2Authentication) {
             OAuth2Authentication authentication = (OAuth2Authentication) auth;
-            String clientId = authentication.getOAuth2Request().getClientId();
-            log.info("clientId is {}", clientId);
-        }
 
+            Integer value1 = (Integer) authentication.getOAuth2Request().getExtensions().get("key1");
+            String value2 = (String) authentication.getOAuth2Request().getExtensions().get("key2");
+            Boolean value3 = (Boolean) authentication.getOAuth2Request().getExtensions().get("key3");
+            log.info("key1:{} 2:{} 3:{}", value1, value2, value3);
+
+            Set<String> scope = authentication.getOAuth2Request().getScope();
+            for (String str : scope) {
+                if (requestPath.startsWith(str)) {
+                    log.info("requestPath:{} In scope:{}", requestPath, str);
+                    return true;
+                }
+            }
+
+            Set<String> resourceIds = authentication.getOAuth2Request().getResourceIds();
+            if (!resourceIds.contains(requestPath)) {
+                log.info("requestPath:{} Not In resourceIds:{}", requestPath, resourceIds);
+                return false;
+            }
+        }
         Object principal = auth.getPrincipal();
         log.info("用户信息:{}", principal.toString());
         return true;

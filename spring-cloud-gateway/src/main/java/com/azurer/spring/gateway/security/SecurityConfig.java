@@ -8,7 +8,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.oauth2.provider.token.TokenStore;
@@ -31,15 +30,18 @@ public class SecurityConfig {
     @Resource
     public RedisConnectionFactory redisConnectionFactory;
 
-    @Resource
-    public AccessManager accessManager;
-
     @Bean
     public TokenStore tokenStore() {
         RedisTokenStore redisTokenStore = new RedisTokenStore(redisConnectionFactory);
         redisTokenStore.setPrefix("auth-token:");
         return redisTokenStore;
     }
+
+    @Resource
+    public CustomAuthorizationManager customAuthorizationManager;
+
+    @Resource
+    public CustomAuthenticationManager customAuthenticationManager;
 
     public WebFilter corsFilter() {
         return (ServerWebExchange ctx, WebFilterChain chain) -> {
@@ -68,10 +70,7 @@ public class SecurityConfig {
 
     @Bean
     SecurityWebFilterChain webFluxSecurityFilterChain(ServerHttpSecurity http) throws Exception {
-        //token管理器
-        ReactiveAuthenticationManager tokenAuthenticationManager = new ReactiveRedisAuthenticationManager(tokenStore());
-        //认证过滤器
-        AuthenticationWebFilter authenticationWebFilter = new AuthenticationWebFilter(tokenAuthenticationManager);
+        AuthenticationWebFilter authenticationWebFilter = new AuthenticationWebFilter(customAuthenticationManager);
         authenticationWebFilter.setServerAuthenticationConverter(new ServerBearerTokenAuthenticationConverter());
 
         http
@@ -79,7 +78,7 @@ public class SecurityConfig {
                 .csrf().disable()
                 .authorizeExchange()
                 .pathMatchers(HttpMethod.OPTIONS).permitAll()
-                .anyExchange().access(accessManager)
+                .anyExchange().access(customAuthorizationManager)
                 .and()
                 // 跨域过滤器
                 .addFilterAt(corsFilter(), SecurityWebFiltersOrder.CORS)

@@ -8,15 +8,20 @@ import org.springframework.security.oauth2.common.exceptions.InvalidTokenExcepti
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.server.resource.BearerTokenAuthenticationToken;
+import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
-@Slf4j
-public class ReactiveRedisAuthenticationManager implements ReactiveAuthenticationManager {
-    private final TokenStore tokenStore;
+import javax.annotation.Resource;
 
-    public ReactiveRedisAuthenticationManager(TokenStore tokenStore){
-        this.tokenStore = tokenStore;
-    }
+/**
+ * 自定义认证管理器
+ *
+ */
+@Slf4j
+@Component
+public class CustomAuthenticationManager implements ReactiveAuthenticationManager {
+    @Resource
+    private TokenStore tokenStore;
 
     @Override
     public Mono<Authentication> authenticate(Authentication authentication) {
@@ -26,8 +31,8 @@ public class ReactiveRedisAuthenticationManager implements ReactiveAuthenticatio
                 .map(BearerTokenAuthenticationToken::getToken)
                 .flatMap((accessToken ->{
                     log.info("accessToken is :{}",accessToken);
+
                     OAuth2AccessToken oAuth2AccessToken = this.tokenStore.readAccessToken(accessToken);
-                    //根据access_token从数据库获取不到OAuth2AccessToken
                     if(oAuth2AccessToken == null){
                         return Mono.error(new InvalidTokenException("invalid access token,please check"));
                     }else if(oAuth2AccessToken.isExpired()){
