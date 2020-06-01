@@ -33,6 +33,8 @@ public class CustomAuthorizationManager implements ReactiveAuthorizationManager<
         permitAll.add("/swagger-ui.html");
         permitAll.add("/**/oauth/**");
         permitAll.add("/**/current/get");
+        permitAll.add("/provider-service/**");
+        permitAll.add("/consumer-service/**");
     }
 
     @Override

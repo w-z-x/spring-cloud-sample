@@ -10,6 +10,8 @@
         <module>spring-cloud-authorization-server</module>
         <module>spring-cloud-gateway</module>
         <module>spring-cloud-eureka</module>
+        <module>spring-cloud-provider-service</module>
+        <module>spring-cloud-consumer-service</module>
     </modules>
     <packaging>pom</packaging>
 

@@ -1,17 +1,8 @@
 spring:
   application:
-    name: gateway
-  cloud:
-    gateway:
-      discovery:
-        locator:
-          enabled: true
-          lowerCaseServiceId: true
-  redis:
-    host: 192.168.133.130
-    port: 6379
+    name: provider-service
 
-server.port: 8080
+server.port: 8082
 
 eureka:
   client:
