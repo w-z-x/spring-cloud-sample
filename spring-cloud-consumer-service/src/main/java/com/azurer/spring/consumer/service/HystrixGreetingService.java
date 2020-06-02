@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class GreetingService {
+public class HystrixGreetingService {
     @Resource
     public RestTemplate restTemplate;
 
