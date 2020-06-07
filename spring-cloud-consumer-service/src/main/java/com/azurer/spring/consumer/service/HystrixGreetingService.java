@@ -19,7 +19,7 @@ public class HystrixGreetingService {
         Map<String, String> params = new HashMap<>();
         params.put("name", name.toUpperCase());
         return restTemplate.getForObject(
-                "http://localhost:8080/provider-service/greeting?name={name}", Greeting.class, params);
+                "http://localhost:8082/greeting?name={name}", Greeting.class, params);
     }
 
     public Greeting reliable(String name) {

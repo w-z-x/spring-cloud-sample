@@ -19,4 +19,5 @@ ribbon:
 #Feign日志级别
 logging:
   level:
-    com.azurer.spring.consumer.service.OpenFeignGreetingService: debug
+    com.azurer.spring.consumer.service.OpenFeignGreetingService: DEBUG
+    org.springframework.web.servlet.DispatcherServlet: DEBUG

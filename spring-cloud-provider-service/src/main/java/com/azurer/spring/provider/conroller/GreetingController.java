@@ -23,6 +23,7 @@ public class GreetingController {
 
     @GetMapping("/greeting")
     public Greeting greeting(@RequestParam(value = "name", defaultValue = "World") String name) {
+        log.info("Greeting {}", name);
         return new Greeting(counter.incrementAndGet(), String.format(template, port, name));
     }
 
