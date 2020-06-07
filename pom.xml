@@ -12,6 +12,7 @@
         <module>spring-cloud-eureka</module>
         <module>spring-cloud-provider-service</module>
         <module>spring-cloud-consumer-service</module>
+        <module>spring-cloud-zipkin</module>
     </modules>
     <packaging>pom</packaging>
 
