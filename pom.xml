@@ -13,6 +13,7 @@
         <module>spring-cloud-provider-service</module>
         <module>spring-cloud-consumer-service</module>
         <module>spring-cloud-zipkin</module>
+        <module>spring-cloud-hystrix-dashboard</module>
     </modules>
     <packaging>pom</packaging>
 

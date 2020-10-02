@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: hystrix-dashboard
+
+#server.port: 8084
+#
+#eureka:
+#  client:
+#    serviceUrl:
+#      defaultZone: http://localhost:8761/eureka
+##      defaultZone: http://user:pwd@peer1:9001/eureka,http://user:pwd@peer2:9002/eureka,http://user:pwd@peer3:9003/eureka
+#
+#ribbon:
+#  #连接超时时间，单位s
+#  ConnectTimeout: 5000
+#  #读取超时时间，单位s
+#  ReadTimeout: 5000
+#
+##Feign日志级别
+#logging:
+#  level:
+#    com.azurer.spring.consumer.service.OpenFeignGreetingService: DEBUG
+#    org.springframework.web.servlet.DispatcherServlet: DEBUG

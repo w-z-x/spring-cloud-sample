@@ -5,7 +5,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(value = "PROVIDER-SERVICE")
+@FeignClient(value = "PROVIDER-SERVICE", fallback = OpenFeignGreetingServiceFallback.class)
 public interface OpenFeignGreetingService {
     @GetMapping(value = "/greeting")
     Greeting getRemoteGreeting(@RequestParam(value = "name", defaultValue = "World") String name);

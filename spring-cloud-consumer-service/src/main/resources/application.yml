@@ -16,6 +16,10 @@ ribbon:
   #读取超时时间，单位s
   ReadTimeout: 5000
 
+feign:
+  hystrix:
+    enabled: true
+
 #Feign日志级别
 logging:
   level:
